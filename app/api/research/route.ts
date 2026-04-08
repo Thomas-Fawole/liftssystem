@@ -4,6 +4,13 @@ import { createProspect } from '@/lib/db';
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
+function checkApiKey() {
+  const key = process.env.ANTHROPIC_API_KEY;
+  if (!key || key === 'your_api_key_here') {
+    throw new Error('ANTHROPIC_API_KEY is not set. Add your key to lifts-media/.env.local and restart the server.');
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -33,8 +40,10 @@ Provide your analysis as a JSON object with EXACTLY this structure:
 
 Return ONLY the JSON object, no other text.`;
 
+    checkApiKey();
+
     const message = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-6',
       max_tokens: 1024,
       messages: [{ role: 'user', content: prompt }],
     });
@@ -67,6 +76,7 @@ Return ONLY the JSON object, no other text.`;
     return NextResponse.json({ prospect, analysis: parsed });
   } catch (error) {
     console.error('Research error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const msg = error instanceof Error ? error.message : 'Internal server error';
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
