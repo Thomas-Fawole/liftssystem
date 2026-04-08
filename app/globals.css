@@ -59,3 +59,66 @@ h1, h2, h3, h4, h5 {
 .delay-2 { animation-delay: 120ms; }
 .delay-3 { animation-delay: 180ms; }
 .delay-4 { animation-delay: 240ms; }
+.delay-5 { animation-delay: 300ms; }
+
+/* ── Responsive layout helpers ── */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* Dashboard table — hidden on mobile, replaced by cards */
+.prospect-table { display: block; }
+.prospect-cards { display: none; }
+
+/* Nav intelligence label */
+.nav-intelligence { display: inline; }
+
+/* Hero h1 size */
+.hero-h1 { font-size: 52px; }
+
+/* Stats value size */
+.stats-value { font-size: 42px; }
+
+/* Page padding */
+.page-main { padding: 0 24px 80px; }
+.page-header-pt { padding-top: 48px; padding-bottom: 40px; }
+
+@media (max-width: 768px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .nav-full-label { display: none !important; }
+  .nav-short-label { display: inline !important; }
+  .two-col { grid-template-columns: 1fr !important; }
+  .form-two-col { grid-template-columns: 1fr !important; }
+  .prospect-table { display: none !important; }
+  .prospect-cards { display: block !important; }
+  .nav-intelligence { display: none !important; }
+  .hero-h1 { font-size: 32px !important; }
+  .stats-value { font-size: 28px !important; }
+  .page-main { padding: 0 16px 60px !important; }
+  .page-header-pt { padding-top: 24px !important; padding-bottom: 20px !important; }
+  .controls-row { flex-direction: column !important; align-items: stretch !important; }
+  .controls-search { width: 100% !important; }
+  .controls-sort { margin-left: 0 !important; }
+  .detail-hero-score { text-align: left !important; }
+  .status-buttons { flex-wrap: wrap !important; }
+}
+
+@media (max-width: 480px) {
+  .hero-h1 { font-size: 26px !important; }
+  .stats-value { font-size: 24px !important; }
+}

@@ -103,14 +103,14 @@ export default function ResearchPage() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--black)' }}>
       <Nav />
-      <main style={{ maxWidth: 860, margin: '0 auto', padding: '0 24px 80px' }}>
+      <main className="page-main" style={{ maxWidth: 860, margin: '0 auto' }}>
 
         {/* Header */}
-        <div className="animate-fade-up" style={{ paddingTop: 48, paddingBottom: 40 }}>
+        <div className="animate-fade-up page-header-pt">
           <p style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--mid-grey)', marginBottom: 10 }}>
             Prospect Research
           </p>
-          <h1 style={{ fontSize: 52, color: 'var(--white)', marginBottom: 10 }}>
+          <h1 className="hero-h1" style={{ color: 'var(--white)', marginBottom: 10 }}>
             Analyse a New Lead
           </h1>
           <p style={{ color: 'var(--mid-grey)', fontSize: 13, maxWidth: 520 }}>
@@ -118,10 +118,11 @@ export default function ResearchPage() {
           </p>
         </div>
 
+
         {!result ? (
           <form onSubmit={handleSubmit} className="animate-fade-up delay-1">
             {/* Two-column grid for most fields */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+            <div className="form-two-col" style={{ marginBottom: 16 }}>
               {/* Company */}
               <div>
                 <label style={labelStyle}>Company Name *</label>
@@ -276,11 +277,12 @@ export default function ResearchPage() {
               style={{
                 border: '1px solid var(--border-light)',
                 borderRadius: 6,
-                padding: '32px 36px',
+                padding: '24px 20px',
                 marginBottom: 16,
                 display: 'flex',
-                alignItems: 'center',
-                gap: 32,
+                alignItems: 'flex-start',
+                gap: 24,
+                flexWrap: 'wrap',
                 background: 'rgba(15,15,13,0.8)',
               }}
             >

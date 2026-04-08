@@ -221,47 +221,45 @@ export default function ProspectDetailPage() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--black)' }}>
       <Nav />
-      <main style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 80px' }}>
+      <main className="page-main" style={{ maxWidth: 900, margin: '0 auto' }}>
 
         {/* Back */}
-        <div style={{ paddingTop: 32, paddingBottom: 32 }}>
+        <div style={{ paddingTop: 24, paddingBottom: 20 }}>
           <button onClick={() => router.back()} style={{ background: 'transparent', border: 'none', color: 'var(--mid-grey)', cursor: 'pointer', fontSize: 11, letterSpacing: '0.08em', fontFamily: 'DM Mono, monospace', padding: 0 }}>
             ← Back
           </button>
         </div>
 
         {/* Hero */}
-        <div className="animate-fade-up" style={{ marginBottom: 32 }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' }}>
-            <div>
+        <div className="animate-fade-up" style={{ marginBottom: 24, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
               <p style={{ fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--mid-grey)', marginBottom: 8 }}>{prospect.industry}</p>
-              <h1 style={{ fontSize: 52, color: 'var(--white)', marginBottom: 10 }}>{prospect.company}</h1>
-              <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+              <h1 className="hero-h1" style={{ color: 'var(--white)', marginBottom: 10 }}>{prospect.company}</h1>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
                 {prospect.website && (
-                  <a href={prospect.website} target="_blank" rel="noreferrer" style={{ color: 'var(--mid-grey)', fontSize: 11, textDecoration: 'none' }}>{prospect.website} ↗</a>
+                  <a href={prospect.website} target="_blank" rel="noreferrer" style={{ color: 'var(--mid-grey)', fontSize: 11, textDecoration: 'none', wordBreak: 'break-all' }}>{prospect.website} ↗</a>
                 )}
                 <span style={{ color: 'var(--mid-grey)', fontSize: 11 }}>Added {prospect.date_added}</span>
                 <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '3px 9px', borderRadius: 3, color: st.color, background: st.bg, border: `1px solid ${st.border}` }}>
                   {prospect.status}
                 </span>
                 {messages.length > 0 && (
-                  <span style={{ fontSize: 10, color: 'var(--mid-grey)' }}>· {messages.filter(m => m.status === 'sent').length} message{messages.filter(m => m.status === 'sent').length !== 1 ? 's' : ''} sent</span>
+                  <span style={{ fontSize: 10, color: 'var(--mid-grey)' }}>· {messages.filter(m => m.status === 'sent').length} sent</span>
                 )}
               </div>
-            </div>
-            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+          </div>
+          <div className="detail-hero-score" style={{ textAlign: 'right', flexShrink: 0 }}>
               <p style={{ fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--mid-grey)', marginBottom: 4 }}>Lead Score</p>
-              <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 68, fontWeight: 300, letterSpacing: '-0.05em', color: scoreColor(prospect.lead_score), lineHeight: 1 }}>
-                {prospect.lead_score}<span style={{ fontSize: 22, color: 'var(--mid-grey)', marginLeft: 2 }}>/100</span>
+              <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 60, fontWeight: 300, letterSpacing: '-0.05em', color: scoreColor(prospect.lead_score), lineHeight: 1 }}>
+                {prospect.lead_score}<span style={{ fontSize: 20, color: 'var(--mid-grey)', marginLeft: 2 }}>/100</span>
               </p>
-            </div>
           </div>
         </div>
 
-        <div style={{ height: 1, background: 'var(--border-light)', marginBottom: 28 }} />
+        <div style={{ height: 1, background: 'var(--border-light)', marginBottom: 20 }} />
 
         {/* Pain Points + Meta */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+        <div className="two-col" style={{ marginBottom: 16 }}>
           <div className="animate-fade-up delay-1" style={{ border: '1px solid var(--border-light)', borderRadius: 6, padding: '22px 24px', background: 'rgba(15,15,13,0.6)' }}>
             <p style={{ fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--mid-grey)', marginBottom: 16 }}>Identified Pain Points</p>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
@@ -384,7 +382,7 @@ export default function ProspectDetailPage() {
           </div>
 
           <form onSubmit={sendMessage} style={{ padding: '20px 24px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: sendChannel === 'email' ? '1fr 1fr' : '1fr', gap: 12, marginBottom: 12 }}>
+            <div className={sendChannel === 'email' ? 'form-two-col' : ''} style={{ marginBottom: 12 }}>
               {/* To */}
               <div>
                 <label style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--mid-grey)', display: 'block', marginBottom: 6 }}>
@@ -529,7 +527,7 @@ export default function ProspectDetailPage() {
         {/* Status Editor */}
         <div style={{ border: '1px solid var(--border-light)', borderRadius: 6, padding: '20px 24px', marginBottom: 16, background: 'rgba(15,15,13,0.6)', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
           <p style={{ fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--mid-grey)', flexShrink: 0 }}>Update Status</p>
-          <div style={{ display: 'flex', gap: 6 }}>
+          <div className="status-buttons" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {STATUSES.map(s => {
               const ss = STATUS_STYLES[s];
               const isActive = prospect.status === s;
