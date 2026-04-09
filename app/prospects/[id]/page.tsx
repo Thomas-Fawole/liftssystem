@@ -70,7 +70,7 @@ export default function ProspectDetailPage() {
   const [scrapeMsg, setScrapeMsg] = useState('');
 
   // Send form state
-  const [sendChannel, setSendChannel] = useState<'email' | 'sms'>('email');
+  const [sendChannel, setSendChannel] = useState<'email' | 'sms' | 'instagram'>('email');
   const [sendTo, setSendTo] = useState('');
   const [sendSubject, setSendSubject] = useState('');
   const [sendBody, setSendBody] = useState('');
@@ -171,6 +171,11 @@ export default function ProspectDetailPage() {
   const prefillFromContact = (c: Contact) => {
     if (sendChannel === 'email' && c.email) setSendTo(c.email);
     if (sendChannel === 'sms' && c.phone) setSendTo(c.phone);
+    if (sendChannel === 'instagram' && c.linkedin) {
+      // Extract username from LinkedIn URL or use as-is
+      const match = c.linkedin.match(/linkedin\.com\/in\/([^/]+)/);
+      setSendTo(match ? match[1] : c.linkedin);
+    }
   };
 
   const copyMessage = () => {
@@ -368,29 +373,48 @@ export default function ProspectDetailPage() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', background: 'rgba(20,20,18,0.95)', borderBottom: '1px solid var(--border-light)' }}>
             <span style={{ fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--mid-grey)' }}>Send Outreach</span>
             {/* Channel toggle */}
-            <div style={{ display: 'flex', gap: 4 }}>
-              {(['email', 'sms'] as const).map(ch => (
+            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+              {([
+                { id: 'email',     label: '✉ Email' },
+                { id: 'sms',       label: '✆ SMS' },
+                { id: 'instagram', label: '◈ Instagram DM' },
+              ] as const).map(ch => (
                 <button
-                  key={ch}
-                  onClick={() => { setSendChannel(ch); setSendTo(''); setSendResult(null); }}
-                  style={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 14px', borderRadius: 3, border: '1px solid', fontFamily: 'DM Mono, monospace', cursor: 'pointer', transition: 'all 0.12s ease', ...(sendChannel === ch ? { background: 'var(--accent)', color: 'var(--black)', borderColor: 'var(--accent)' } : { background: 'transparent', color: 'var(--mid-grey)', borderColor: 'var(--border-light)' }) }}
+                  key={ch.id}
+                  onClick={() => { setSendChannel(ch.id); setSendTo(''); setSendResult(null); }}
+                  style={{
+                    fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase',
+                    padding: '5px 14px', borderRadius: 3, border: '1px solid',
+                    fontFamily: 'DM Mono, monospace', cursor: 'pointer', transition: 'all 0.12s ease',
+                    ...(sendChannel === ch.id
+                      ? { background: ch.id === 'instagram' ? 'linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)' : 'var(--accent)', color: ch.id === 'instagram' ? '#fff' : 'var(--black)', borderColor: 'transparent' }
+                      : { background: 'transparent', color: 'var(--mid-grey)', borderColor: 'var(--border-light)' }
+                    ),
+                  }}
                 >
-                  {ch === 'email' ? '✉ Email' : '✆ SMS'}
+                  {ch.label}
                 </button>
               ))}
             </div>
           </div>
 
           <form onSubmit={sendMessage} style={{ padding: '20px 24px' }}>
+            {/* Instagram notice */}
+            {sendChannel === 'instagram' && (
+              <div style={{ background: 'rgba(131,58,180,0.08)', border: '1px solid rgba(131,58,180,0.25)', borderRadius: 4, padding: '10px 14px', marginBottom: 14, fontSize: 11, color: 'var(--mid-grey)', lineHeight: 1.6 }}>
+                <strong style={{ color: 'var(--white)' }}>Instagram API note:</strong> Meta only allows DMs to users who have messaged your account first, or who follow you. Enter their <strong style={{ color: 'var(--white)' }}>IGSID</strong> (numeric user ID) or <strong style={{ color: 'var(--white)' }}>@username</strong> — the app will attempt to resolve it automatically.
+              </div>
+            )}
+
             <div className={sendChannel === 'email' ? 'form-two-col' : ''} style={{ marginBottom: 12 }}>
               {/* To */}
               <div>
                 <label style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--mid-grey)', display: 'block', marginBottom: 6 }}>
-                  {sendChannel === 'email' ? 'To (email address)' : 'To (phone number)'}
+                  {sendChannel === 'email' ? 'To (email address)' : sendChannel === 'sms' ? 'To (phone number)' : 'To (@username or IGSID)'}
                 </label>
                 <input
-                  type={sendChannel === 'email' ? 'email' : 'tel'}
-                  placeholder={sendChannel === 'email' ? 'contact@company.com' : '+447700900000'}
+                  type={sendChannel === 'email' ? 'email' : 'text'}
+                  placeholder={sendChannel === 'email' ? 'contact@company.com' : sendChannel === 'sms' ? '+447700900000' : '@username or 123456789'}
                   value={sendTo}
                   onChange={e => setSendTo(e.target.value)}
                   required
@@ -401,14 +425,14 @@ export default function ProspectDetailPage() {
                 {/* Quick-fill from contacts */}
                 {contacts.length > 0 && (
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 6 }}>
-                    {contacts.filter(c => sendChannel === 'email' ? c.email : c.phone).map((c, i) => (
+                    {contacts.filter(c => sendChannel === 'email' ? c.email : sendChannel === 'sms' ? c.phone : c.linkedin).map((c, i) => (
                       <button
                         key={i}
                         type="button"
                         onClick={() => prefillFromContact(c)}
                         style={{ fontSize: 9, padding: '2px 8px', border: '1px solid var(--border-light)', borderRadius: 10, background: 'transparent', color: 'var(--mid-grey)', cursor: 'pointer', fontFamily: 'DM Mono, monospace' }}
                       >
-                        {c.name || (sendChannel === 'email' ? c.email : c.phone)}
+                        {c.name || (sendChannel === 'email' ? c.email : sendChannel === 'sms' ? c.phone : c.linkedin)}
                       </button>
                     ))}
                   </div>
@@ -436,7 +460,7 @@ export default function ProspectDetailPage() {
             <div style={{ marginBottom: 14 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                 <label style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--mid-grey)' }}>
-                  Message{sendChannel === 'sms' ? ` (${sendBody.length} chars)` : ''}
+                  Message{sendChannel === 'sms' ? ` (${sendBody.length} chars)` : sendChannel === 'instagram' ? ` (${sendBody.length} chars · max 1000)` : ''}
                 </label>
                 <button
                   type="button"
@@ -482,7 +506,7 @@ export default function ProspectDetailPage() {
                 >
                   {sending ? (
                     <><span style={{ width: 13, height: 13, border: '2px solid rgba(0,0,0,0.2)', borderTopColor: 'var(--black)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', display: 'inline-block' }} />Sending...</>
-                  ) : `Send ${sendChannel === 'email' ? 'Email' : 'SMS'} →`}
+                  ) : `Send ${sendChannel === 'email' ? 'Email' : sendChannel === 'sms' ? 'SMS' : 'Instagram DM'} →`}
                 </button>
               </div>
             </div>

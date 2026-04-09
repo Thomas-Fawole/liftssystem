@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendEmail } from '@/lib/mailer';
 import { sendSms } from '@/lib/sms';
+import { sendInstagramDm } from '@/lib/instagram';
 import { createMessage, updateProspectStatus } from '@/lib/db';
 
 export async function POST(req: NextRequest) {
@@ -21,8 +22,10 @@ export async function POST(req: NextRequest) {
         await sendEmail({ to: recipient, subject: subject || 'Introduction from Lifts Media', text: message });
       } else if (channel === 'sms') {
         await sendSms(recipient, message);
+      } else if (channel === 'instagram') {
+        await sendInstagramDm(recipient, message);
       } else {
-        return NextResponse.json({ error: 'Channel must be "email" or "sms"' }, { status: 400 });
+        return NextResponse.json({ error: 'Channel must be "email", "sms", or "instagram"' }, { status: 400 });
       }
     } catch (err: unknown) {
       status = 'failed';
