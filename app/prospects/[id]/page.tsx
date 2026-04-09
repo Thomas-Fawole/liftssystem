@@ -457,29 +457,47 @@ export default function ProspectDetailPage() {
             </div>
 
             {/* Message body */}
-            <div style={{ marginBottom: 14 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                <label style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--mid-grey)' }}>
-                  Message{sendChannel === 'sms' ? ` (${sendBody.length} chars)` : sendChannel === 'instagram' ? ` (${sendBody.length} chars · max 1000)` : ''}
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setSendBody(prospect.outreach_message)}
-                  style={{ fontSize: 9, letterSpacing: '0.08em', padding: '2px 8px', border: '1px solid var(--border-light)', borderRadius: 3, background: 'transparent', color: 'var(--mid-grey)', cursor: 'pointer', fontFamily: 'DM Mono, monospace' }}
-                >
-                  Reset to AI message
-                </button>
-              </div>
-              <textarea
-                value={sendBody}
-                onChange={e => setSendBody(e.target.value)}
-                required
-                rows={sendChannel === 'sms' ? 4 : 8}
-                style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.65 }}
-                onFocus={e => (e.target.style.borderColor = 'var(--accent)')}
-                onBlur={e => (e.target.style.borderColor = 'var(--border-light)')}
-              />
-            </div>
+            {(() => {
+              const igOver = sendChannel === 'instagram' && sendBody.length > 1000;
+              const igWarn = sendChannel === 'instagram' && sendBody.length > 800 && sendBody.length <= 1000;
+              const charColor = igOver ? '#ff6b4a' : igWarn ? '#f5c842' : 'var(--mid-grey)';
+              return (
+                <div style={{ marginBottom: 14 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <label style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--mid-grey)' }}>
+                      Message
+                      {(sendChannel === 'sms' || sendChannel === 'instagram') && (
+                        <span style={{ color: charColor, marginLeft: 6 }}>
+                          {sendBody.length}{sendChannel === 'instagram' ? ' / 1000' : ' chars'}
+                          {igOver && ' — too long'}
+                        </span>
+                      )}
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setSendBody(prospect.outreach_message)}
+                      style={{ fontSize: 9, letterSpacing: '0.08em', padding: '2px 8px', border: '1px solid var(--border-light)', borderRadius: 3, background: 'transparent', color: 'var(--mid-grey)', cursor: 'pointer', fontFamily: 'DM Mono, monospace' }}
+                    >
+                      Reset to AI message
+                    </button>
+                  </div>
+                  <textarea
+                    value={sendBody}
+                    onChange={e => setSendBody(e.target.value)}
+                    required
+                    rows={sendChannel === 'sms' || sendChannel === 'instagram' ? 4 : 8}
+                    style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.65, borderColor: igOver ? '#ff6b4a' : 'var(--border-light)' }}
+                    onFocus={e => (e.target.style.borderColor = igOver ? '#ff6b4a' : 'var(--accent)')}
+                    onBlur={e => (e.target.style.borderColor = igOver ? '#ff6b4a' : 'var(--border-light)')}
+                  />
+                  {igOver && (
+                    <p style={{ fontSize: 10, color: '#ff6b4a', marginTop: 5 }}>
+                      Instagram DMs are limited to 1000 characters. Trim {sendBody.length - 1000} characters before sending.
+                    </p>
+                  )}
+                </div>
+              );
+            })()}
 
             {/* Options + Submit */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
@@ -501,8 +519,8 @@ export default function ProspectDetailPage() {
                 )}
                 <button
                   type="submit"
-                  disabled={sending || !sendTo || !sendBody}
-                  style={{ background: sending || !sendTo || !sendBody ? 'var(--border-light)' : 'var(--accent)', color: sending || !sendTo || !sendBody ? 'var(--mid-grey)' : 'var(--black)', border: 'none', borderRadius: 4, padding: '10px 24px', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'DM Mono, monospace', cursor: sending || !sendTo || !sendBody ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 8, transition: 'all 0.15s ease' }}
+                  disabled={sending || !sendTo || !sendBody || (sendChannel === 'instagram' && sendBody.length > 1000)}
+                  style={{ background: sending || !sendTo || !sendBody || (sendChannel === 'instagram' && sendBody.length > 1000) ? 'var(--border-light)' : 'var(--accent)', color: sending || !sendTo || !sendBody || (sendChannel === 'instagram' && sendBody.length > 1000) ? 'var(--mid-grey)' : 'var(--black)', border: 'none', borderRadius: 4, padding: '10px 24px', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'DM Mono, monospace', cursor: sending || !sendTo || !sendBody || (sendChannel === 'instagram' && sendBody.length > 1000) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 8, transition: 'all 0.15s ease' }}
                 >
                   {sending ? (
                     <><span style={{ width: 13, height: 13, border: '2px solid rgba(0,0,0,0.2)', borderTopColor: 'var(--black)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', display: 'inline-block' }} />Sending...</>

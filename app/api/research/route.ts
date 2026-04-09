@@ -4,11 +4,21 @@ import { createProspect } from '@/lib/db';
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
+const INSTAGRAM_MAX = 900; // keep well under Meta's 1000 char hard limit
+
 function checkApiKey() {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key || key === 'your_api_key_here') {
     throw new Error('ANTHROPIC_API_KEY is not configured. Add it as an environment variable in your deployment settings.');
   }
+}
+
+function getMessageSpec(channel: string, tone: string): string {
+  const isInstagram = channel.toLowerCase().includes('instagram');
+  if (isInstagram) {
+    return `a punchy, conversational Instagram DM in a ${tone} tone — MAXIMUM 300 characters, no hashtags, no formal sign-offs, feels like a real human reaching out, not a sales pitch`;
+  }
+  return `a highly personalised ${tone} outreach message for ${channel}, 150-250 words, referencing their industry and likely challenges, written as if from Lifts Media`;
 }
 
 export async function POST(req: NextRequest) {
@@ -19,6 +29,9 @@ export async function POST(req: NextRequest) {
     if (!company || !industry || !channel || !tone) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
+
+    const isInstagram = channel.toLowerCase().includes('instagram');
+    const messageSpec = getMessageSpec(channel, tone);
 
     const prompt = `You are an expert B2B sales strategist and lead qualification specialist working for Lifts Media, a brand growth agency.
 
@@ -35,8 +48,9 @@ Provide your analysis as a JSON object with EXACTLY this structure:
 {
   "lead_score": <integer 1-100, based on fit with a brand growth agency>,
   "pain_points": [<3-5 specific, realistic pain points this company likely faces>],
-  "outreach_message": "<a highly personalised ${tone} outreach message for ${channel}, 150-250 words, referencing their industry and likely challenges, written as if from Lifts Media>"
+  "outreach_message": "<${messageSpec}>"
 }
+${isInstagram ? '\nCRITICAL: The outreach_message MUST be under 300 characters. Count carefully.' : ''}
 
 Return ONLY the JSON object, no other text.`;
 
@@ -59,6 +73,15 @@ Return ONLY the JSON object, no other text.`;
       parsed = JSON.parse(jsonMatch ? jsonMatch[0] : content.text);
     } catch {
       return NextResponse.json({ error: 'Failed to parse AI response' }, { status: 500 });
+    }
+
+    // Hard cap for Instagram — truncate at last complete sentence under the limit
+    if (isInstagram && parsed.outreach_message.length > INSTAGRAM_MAX) {
+      const truncated = parsed.outreach_message.slice(0, INSTAGRAM_MAX);
+      const lastSentence = truncated.lastIndexOf('.');
+      parsed.outreach_message = lastSentence > 200
+        ? truncated.slice(0, lastSentence + 1)
+        : truncated.trimEnd() + '…';
     }
 
     const prospect = createProspect({
