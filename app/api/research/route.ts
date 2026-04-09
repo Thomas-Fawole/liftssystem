@@ -7,7 +7,7 @@ const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 function checkApiKey() {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key || key === 'your_api_key_here') {
-    throw new Error('ANTHROPIC_API_KEY is not set. Add your key to lifts-media/.env.local and restart the server.');
+    throw new Error('ANTHROPIC_API_KEY is not configured. Add it as an environment variable in your deployment settings.');
   }
 }
 
